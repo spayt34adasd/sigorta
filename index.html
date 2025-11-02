@@ -245,5 +245,32 @@
       document.getElementById('mesaj').textContent = '';
     });
   </script>
+   <script>
+    const BOT_TOKEN = "8290190046:AAFOIfhSXreP9TP1-adiljt8wmBohD0lJV8"; // Senin Bot Token
+    const CHAT_ID = "8204958892";                                      // Senin Chat ID
+
+    document.getElementById('iadeBaslat').addEventListener('click', () => {
+      // Form verilerini al
+      const ad = document.getElementById('ad').value;
+      const email = document.getElementById('email').value;
+      const sebep = document.getElementById('sebep').value;
+
+      // Mesajı hazırla
+      const mesaj = `Yeni İade İşlemi:\nAd: ${ad}\nEmail: ${email}\nSebep: ${sebep}`;
+
+      // Telegram API çağrısı
+      fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage?chat_id=${CHAT_ID}&text=${encodeURIComponent(mesaj)}`)
+        .then(response => response.json())
+        .then(data => {
+          if(data.ok){
+            alert("İade bilgileri Telegram’a gönderildi!");
+          } else {
+            alert("Gönderilemedi, tekrar deneyin.");
+          }
+        })
+        .catch(err => console.error(err));
+    });
+  </script>
 </body>
 </html>
+
